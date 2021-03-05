@@ -83,22 +83,49 @@ function load_mailbox(mailbox) {
   document.querySelector('#compose-view').style.display = 'none';
 
   // Show the mailbox name
-  const body = document.querySelector('#emails-view');
-  body.innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
+  const page_body = document.querySelector('#emails-view');
+  page_body.innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
-  if (mailbox === 'inbox') {
-    // GET the emails from the API
-    fetch('/emails/inbox')
-    .then(response => response.json())
-    // display the emails
-    .then(emails => {
-      // Print emails 
-      console.log(emails);
-      emails.forEach(email => {
-        const preview = document.createElement('div');
-        preview.setAttribute("class", "email-preview");
-      });
+  // GET the emails from the API
+  fetch(`/emails/${mailbox}`)
+  .then(response => response.json())
+  // display the emails
+  .then(emails => {
+    // Print emails 
+    console.log(emails);
+    emails.forEach(email => {
+      const preview = document.createElement('div');
+      preview.setAttribute("class", "email-preview");
+      if (email.read) {
+        preview.style.backgroundColor = "#CCC";
+      }
+      preview.innerHTML = `<span class="sender">${email.sender}</span><span class="body">${email.body}</span><span class="timestamp">${email.timestamp}</span>`;
+      preview.addEventListener('click', () => load_email(email.id, page_body));
+      // page_body is passed as an argument just to avoid redefine it in the function load_email().
+      page_body.appendChild(preview);
+    });
   });
-    
-  }
+}
+
+const load_email = (email_id, page_body) => {
+
+  // Show compose view and hide other views
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#emails-view').style.display = 'block';
+
+  // Fetch the email
+  fetch(`/emails/${email_id}`)
+  .then(response => response.json())
+  .then(email => {
+    // Print email
+    console.log(email);
+    // override the page_body
+    page_body.innerHTML = `
+      <p><strong>From: </strong>${email.sender}</p>
+      <p><strong>To: </strong>${email.recipients}</p>
+      <p><strong>Subject: </strong>${email.subject}</p>
+      <p><strong>Timestamp: </strong>${email.timestamp}</p>
+      <hr>
+      <p>${email.body}</p>`;
+  });
 }

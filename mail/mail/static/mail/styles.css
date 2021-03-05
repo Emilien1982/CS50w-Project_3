@@ -2,12 +2,36 @@ textarea {
     min-height: 400px;
 }
 
+strong {
+    font-weight: bolder;
+}
+
+/* On Compose view */
 #alert-compose {
     font-size: larger;
     font-weight: bold;
     display: none;
 }
 
+/* On all mailbox views */
 .email-preview {
+    padding: 5px 5px;
+    margin-bottom: 2px;
     border: solid 1px black;
+}
+
+.sender {
+    font-weight: bold;
+    margin-right: 1em;
+}
+
+.body {
+    color: black;
+    overflow: hidden;
+    width: auto;
+}
+
+.timestamp {
+    float: right;
+    color: grey;
 }
