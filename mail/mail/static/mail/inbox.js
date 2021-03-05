@@ -120,6 +120,7 @@ const load_email = (email_id, page_body) => {
     // Print email
     console.log(email);
     // override the page_body
+        //EVENTUELLEMENT MODIFIER L AFFICHAGE DES DESTINATAIRES POUR INTEGRER UN ESPACE ENTRE EUX (APRES LA VIRGULE)
     page_body.innerHTML = `
       <p><strong>From: </strong>${email.sender}</p>
       <p><strong>To: </strong>${email.recipients}</p>
@@ -129,3 +130,4 @@ const load_email = (email_id, page_body) => {
       <p>${email.body}</p>`;
   });
 }
+
