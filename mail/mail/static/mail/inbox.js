@@ -15,6 +15,7 @@ function compose_email() {
 
   // Show compose view and hide other views
   document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
@@ -77,13 +78,14 @@ function compose_email() {
 }
 
 function load_mailbox(mailbox) {
+  const page_body = document.querySelector('#emails-view');
   
   // Show the mailbox and hide other views
-  document.querySelector('#emails-view').style.display = 'block';
+  document.querySelector('#email-view').style.display = 'none';
   document.querySelector('#compose-view').style.display = 'none';
+  page_body.style.display = 'block';
 
   // Show the mailbox name
-  const page_body = document.querySelector('#emails-view');
   page_body.innerHTML = `<h3>${mailbox.charAt(0).toUpperCase() + mailbox.slice(1)}</h3>`;
 
   // GET the emails from the API
@@ -100,18 +102,14 @@ function load_mailbox(mailbox) {
         preview.style.backgroundColor = "#CCC";
       }
       preview.innerHTML = `<span class="sender">${email.sender}</span><span class="body">${email.body}</span><span class="timestamp">${email.timestamp}</span>`;
-      preview.addEventListener('click', () => load_email(email.id, page_body));
-      // page_body is passed as an argument just to avoid redefine it in the function load_email().
+      preview.addEventListener('click', () => load_email(email.id));
       page_body.appendChild(preview);
     });
   });
 }
 
-const load_email = (email_id, page_body) => {
-
-  // Show compose view and hide other views
-  document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#emails-view').style.display = 'block';
+const load_email = (email_id) => {
+  const page_body = document.querySelector('#email-view');
 
   // Fetch the email
   fetch(`/emails/${email_id}`)
@@ -119,7 +117,7 @@ const load_email = (email_id, page_body) => {
   .then(email => {
     // Print email
     console.log(email);
-    // override the page_body
+    // Update the HTML
         //EVENTUELLEMENT MODIFIER L AFFICHAGE DES DESTINATAIRES POUR INTEGRER UN ESPACE ENTRE EUX (APRES LA VIRGULE)
     page_body.innerHTML = `
       <p><strong>From: </strong>${email.sender}</p>
@@ -128,6 +126,21 @@ const load_email = (email_id, page_body) => {
       <p><strong>Timestamp: </strong>${email.timestamp}</p>
       <hr>
       <p>${email.body}</p>`;
+    
+    // Mark email as read (if not done yet)
+    if (!email.read) {
+      fetch(`/emails/${email_id}`, {
+        method: 'PUT',
+        body: JSON.stringify({
+            read: true
+        })
+      })
+    }
   });
-}
+  
+  // Show compose view and hide other views
+  document.querySelector('#compose-view').style.display = 'none';
+  document.querySelector('#emails-view').style.display = 'none';
+  page_body.style.display = 'block';
 
+}
