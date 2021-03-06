@@ -10,18 +10,34 @@ document.addEventListener('DOMContentLoaded', function() {
   load_mailbox('inbox');
 });
 
-function compose_email() {
+function compose_email(original_email) {
   const alert = document.querySelector('#alert-compose');
-
-  // Show compose view and hide other views
-  document.querySelector('#emails-view').style.display = 'none';
-  document.querySelector('#email-view').style.display = 'none';
-  document.querySelector('#compose-view').style.display = 'block';
 
   // Clear out composition fields
   document.querySelector('#compose-recipients').value = '';
   document.querySelector('#compose-subject').value = '';
   document.querySelector('#compose-body').value = '';
+
+  // if original_email.sender (the user clicked the "reply" button), pre-fill the fields
+  if (original_email.sender) {
+    // checking the presence of original_email.sender to make sure a real email has been passed as an argument (via the reply button)
+    // it's important because clicking the "compose" button in the header will pass the click event as an argument. This case, the fileds should stay blank
+    console.log("entrer dans le if original_email")
+    document.querySelector('#compose-recipients').value = original_email.sender;
+    let pre_subject = "";
+    if (original_email.subject.slice(0, 4) !== "Re: ") {
+      pre_subject = "Re: "
+    }
+    document.querySelector('#compose-subject').value = pre_subject + original_email.subject;
+    document.querySelector('#compose-body').value = `On ${original_email.timestamp} ${original_email.sender} wrote:
+    ${original_email.body}
+    `;
+  }
+
+  // Show compose view and hide other views
+  document.querySelector('#emails-view').style.display = 'none';
+  document.querySelector('#email-view').style.display = 'none';
+  document.querySelector('#compose-view').style.display = 'block';
 
   // Handle form submission
   document.querySelector('#compose-form').onsubmit = (e) => {
@@ -98,7 +114,7 @@ function load_mailbox(mailbox) {
       if (email.read) {
         preview.style.backgroundColor = "#CCC";
       }
-      preview.innerHTML = `<span class="sender">${email.sender}</span><span class="body">${email.body}</span><span class="timestamp">${email.timestamp}</span>`;
+      preview.innerHTML = `<span class="sender">${email.sender}</span><span class="subject">${email.subject}</span><span class="timestamp">${email.timestamp}</span>`;
       preview.addEventListener('click', () => load_email(email.id, mailbox));
       page_body.appendChild(preview);
     });
@@ -108,6 +124,8 @@ function load_mailbox(mailbox) {
 const load_email = (email_id,mailbox) => {
   const arch_btn = document.querySelector("#archive-btn");
   arch_btn.style.display = "none";
+  const reply_btn = document.querySelector("#reply-btn");
+  reply_btn.style.display = "none";
 
   // Fetch the email
   fetch(`/emails/${email_id}`)
@@ -140,8 +158,14 @@ const load_email = (email_id,mailbox) => {
         .then(() => setTimeout(() => load_mailbox('inbox'), 200));
       });
       arch_btn.style.display = "block";
+      reply_btn.style.display = "block";
     }
   
+    // Set the reply button to passed the correct email as argument
+    document.querySelector("#reply-btn").addEventListener('click', () => {
+      compose_email(email);
+    });
+
     // Show compose view and hide other views
     document.querySelector('#compose-view').style.display = 'none';
     document.querySelector('#emails-view').style.display = 'none';

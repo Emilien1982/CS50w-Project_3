@@ -1,5 +1,5 @@
 textarea {
-    min-height: 400px;
+    min-height: 350px;
 }
 
 strong {
@@ -10,7 +10,6 @@ strong {
 #alert-compose {
     font-size: larger;
     font-weight: bold;
-    display: none;
 }
 
 /* On all mailbox views */
@@ -25,7 +24,7 @@ strong {
     margin-right: 1em;
 }
 
-.body {
+.subject {
     color: black;
     overflow: hidden;
     width: auto;
@@ -34,9 +33,4 @@ strong {
 .timestamp {
     float: right;
     color: grey;
-}
-
-/* On email view */
-#archive-btn {
-    display: none;
 }
