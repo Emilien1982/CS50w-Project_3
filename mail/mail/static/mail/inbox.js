@@ -54,7 +54,7 @@ function compose_email() {
         alert.style.color = "green";
         alert.innerHTML = result.message;
         alert.style.display = "block";
-        // empty the fields - ###### SURPERFLU #######
+        // empty the fields
         document.querySelector('#compose-recipients').value = '';
         document.querySelector('#compose-subject').value = '';
         document.querySelector('#compose-body').value = '';
@@ -72,7 +72,6 @@ function compose_email() {
         alert.style.display = "block";
       }
     });
-    console.log(recipients);
     return false;
   };
 }
@@ -93,8 +92,6 @@ function load_mailbox(mailbox) {
   .then(response => response.json())
   // display the emails
   .then(emails => {
-    // Print emails 
-    console.log(emails);
     emails.forEach(email => {
       const preview = document.createElement('div');
       preview.setAttribute("class", "email-preview");
@@ -102,31 +99,54 @@ function load_mailbox(mailbox) {
         preview.style.backgroundColor = "#CCC";
       }
       preview.innerHTML = `<span class="sender">${email.sender}</span><span class="body">${email.body}</span><span class="timestamp">${email.timestamp}</span>`;
-      preview.addEventListener('click', () => load_email(email.id));
+      preview.addEventListener('click', () => load_email(email.id, mailbox));
       page_body.appendChild(preview);
     });
   });
 }
 
-const load_email = (email_id) => {
-  const page_body = document.querySelector('#email-view');
+const load_email = (email_id,mailbox) => {
+  const arch_btn = document.querySelector("#archive-btn");
+  arch_btn.style.display = "none";
 
   // Fetch the email
   fetch(`/emails/${email_id}`)
   .then(response => response.json())
   .then(email => {
-    // Print email
-    console.log(email);
-    // Update the HTML
-        //EVENTUELLEMENT MODIFIER L AFFICHAGE DES DESTINATAIRES POUR INTEGRER UN ESPACE ENTRE EUX (APRES LA VIRGULE)
-    page_body.innerHTML = `
-      <p><strong>From: </strong>${email.sender}</p>
-      <p><strong>To: </strong>${email.recipients}</p>
-      <p><strong>Subject: </strong>${email.subject}</p>
-      <p><strong>Timestamp: </strong>${email.timestamp}</p>
-      <hr>
-      <p>${email.body}</p>`;
-    
+
+    // Fill up the HTML
+    document.querySelector("#email-from").innerHTML = "<strong>From: </strong>" + email.sender;
+    // Arrange a nice presentation of the recipients. Separated them with comma and space
+    let recipients_field = "<strong>To: </strong>";
+    email.recipients.forEach((recipient) => {
+      recipients_field += recipient + ", ";
+    })
+    document.querySelector("#email-to").innerHTML = recipients_field.slice(0, -2);
+    document.querySelector("#email-subject").innerHTML = "<strong>Subject: </strong>" + email.subject;
+    document.querySelector("#email-timestamp").innerHTML = "<strong>Timestamp: </strong>" + email.timestamp;
+    document.querySelector("#email-body").innerHTML = email.body;
+  
+    // update the archive button regarding the mailbox from which email has been clicked
+    if (mailbox !== 'sent') {
+      let isInbox = mailbox ==='inbox';
+      arch_btn.innerHTML = isInbox ? "Archive" : "Unarchive";
+      arch_btn.addEventListener('click', () => {
+        fetch(`/emails/${email.id}`, {
+          method: 'PUT',
+          body: JSON.stringify({
+              archived: isInbox
+          })
+        })
+        .then(() => setTimeout(() => load_mailbox('inbox'), 200));
+      });
+      arch_btn.style.display = "block";
+    }
+  
+    // Show compose view and hide other views
+    document.querySelector('#compose-view').style.display = 'none';
+    document.querySelector('#emails-view').style.display = 'none';
+    document.querySelector('#email-view').style.display = 'block';
+
     // Mark email as read (if not done yet)
     if (!email.read) {
       fetch(`/emails/${email_id}`, {
@@ -134,13 +154,7 @@ const load_email = (email_id) => {
         body: JSON.stringify({
             read: true
         })
-      })
+      });
     }
   });
-  
-  // Show compose view and hide other views
-  document.querySelector('#compose-view').style.display = 'none';
-  document.querySelector('#emails-view').style.display = 'none';
-  page_body.style.display = 'block';
-
 }

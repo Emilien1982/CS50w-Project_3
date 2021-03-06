@@ -35,3 +35,8 @@ strong {
     float: right;
     color: grey;
 }
+
+/* On email view */
+#archive-btn {
+    display: none;
+}
