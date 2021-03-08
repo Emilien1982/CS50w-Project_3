@@ -22,7 +22,6 @@ function compose_email(original_email) {
   if (original_email.sender) {
     // checking the presence of original_email.sender to make sure a real email has been passed as an argument (via the reply button)
     // it's important because clicking the "compose" button in the header will pass the click event as an argument. This case, the fileds should stay blank
-    console.log("entrer dans le if original_email")
     document.querySelector('#compose-recipients').value = original_email.sender;
     let pre_subject = "";
     if (original_email.subject.slice(0, 4) !== "Re: ") {

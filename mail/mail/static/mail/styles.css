@@ -1,7 +1,3 @@
-textarea {
-    min-height: 350px;
-}
-
 strong {
     font-weight: bolder;
 }
@@ -10,6 +6,10 @@ strong {
 #alert-compose {
     font-size: larger;
     font-weight: bold;
+}
+
+textarea {
+    min-height: 350px;
 }
 
 /* On all mailbox views */
@@ -33,4 +33,14 @@ strong {
 .timestamp {
     float: right;
     color: grey;
+}
+
+/* On email view */
+#btn-container{
+    display: flex;
+    justify-content: space-between;
+}
+
+#email-body {
+    text-align: justify;
 }
